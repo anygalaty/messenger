@@ -18,7 +18,7 @@ class Chat(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    chat_type: Mapped[str] = mapped_column(Enum('personal', 'group'), default='personal')
+    chat_type: Mapped[str] = mapped_column(Enum('personal', 'group'), nullable=False)
     participants: Mapped[list[User]] = relationship(
         'User',
         secondary=chat_participants,
