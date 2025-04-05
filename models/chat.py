@@ -1,8 +1,7 @@
 from datetime import datetime
 from core.base import Base
-from models.user import User
-from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import String, ForeignKey, DateTime, Enum, Table, Column, relationship
+from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy import String, ForeignKey, DateTime, Enum, Table, Column
 import uuid
 
 chat_participants = Table(
@@ -18,10 +17,10 @@ class Chat(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
-    chat_type: Mapped[str] = mapped_column(Enum('personal', 'group'), nullable=False)
-    participants: Mapped[list[User]] = relationship(
+    chat_type: Mapped[str] = mapped_column(Enum('personal', 'group', name='chat_type_enum'), nullable=False)
+    participants: Mapped[list] = relationship(
         'User',
         secondary=chat_participants,
         back_populates='chats',
-        order_by=User.name,
+        order_by='User.name',
     )

@@ -1,5 +1,5 @@
 from core.base import Base
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import String
 import uuid
 
@@ -11,3 +11,15 @@ class User(Base):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     password: Mapped[str] = mapped_column(String, nullable=False)
+
+    chats: Mapped[list] = relationship(
+        "Chat",
+        secondary="chat_participants",
+        back_populates="participants"
+    )
+
+    groups: Mapped[list] = relationship(
+        "Group",
+        secondary="group_participants",
+        back_populates="participants"
+    )

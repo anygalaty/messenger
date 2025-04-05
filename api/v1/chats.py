@@ -6,7 +6,7 @@ from schemas.chat import ChatCreate, ChatOut, ChatType
 router = APIRouter()
 
 
-@router.post("/chats/create", response_model=ChatOut)
+@router.post("/create", response_model=ChatOut)
 async def create_chat(chat: ChatCreate, db=Depends(async_get_db)):
     if len(chat.participants) < 2:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough participants")

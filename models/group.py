@@ -19,10 +19,10 @@ class Group(Base):
     name: Mapped[str] = mapped_column(String(50), default="Group")
     created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
     creator_id: Mapped[str] = mapped_column(String, ForeignKey(User.id), nullable=False)
-    group_type: Mapped[str] = mapped_column(Enum('public', 'private'), default='public')
+    group_type: Mapped[str] = mapped_column(Enum('public', 'private', name='group_type_enum'), default='public')
     participants: Mapped[list[User]] = relationship(
         'User',
         secondary=group_participants,
-        backref='groups',
+        back_populates='groups',
         order_by=User.name
     )

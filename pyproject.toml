@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Messenger"
 authors = ["Andrey Yashinin <dron8052@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -14,6 +15,11 @@ sqlalchemy = "^2.0.40"
 jinja2 = "^3.1.6"
 dotenv = "^0.9.9"
 pydantic-settings = "^2.8.1"
+pyjwt = "^2.10.1"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+asyncpg = "^0.30.0"
+pydantic = {extras = ["email"], version = "^2.11.2"}
+psycopg2-binary = "^2.9.10"
 
 
 [build-system]

@@ -1,16 +1,29 @@
-from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-class Settings(BaseSettings):
-    DB_HOST: str = Field(..., env='DB_HOST')
-    DB_PORT: str = Field(..., env='DB_PORT')
-    DB_NAME: str = Field(..., env='DB_NAME')
-    DB_USER: str = Field(..., env='DB_USER')
-    DB_PASSWORD: str = Field(..., env='DB_PASSWORD')
+class DBSettings(BaseSettings):
+    host: str
+    port: int
+    name: str
+    user: str
+    password: str
+
+    model_config = SettingsConfigDict(env_prefix='DB_')
 
 
-settings = Settings()
+class SecuritySettings(BaseSettings):
+    secret_key: str
+    algorithm: str
+    access_token_expire_minutes: int = 15
+    refresh_token_expire_days: int = 7
+
+    model_config = SettingsConfigDict(env_prefix='SECURITY_')
+
+
+db_settings = DBSettings()
+security_settings = SecuritySettings()
+
+
