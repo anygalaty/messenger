@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои чаты</title>
+</head>
+<body>
+    <h1>Ваши чаты</h1>
+    {% if chats %}
+      <ul>
+        {% for chat in chats %}
+          <li>
+            <a href="/chat/{{ chat.id }}">
+              {{ chat.chat_type }} чат от {{ chat.created_at }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Нет активных чатов</p>
+    {% endif %}
+    <h1>Ваши группы</h1>
+    <p>Тут будут группы</p>
+    <form action="/api/v1/auth/logout/" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+</body>
+</html>
