@@ -7,6 +7,8 @@
 </head>
 <body>
     <h1 style="text-align: center;">Чат {{ chat_id }}</h1>
+
+    <div id="typing-indicator" style="text-align: center; color: #888; font-style: italic; margin-bottom: 10px;"></div>
     <div id="messages"></div>
 
     <div id="input-container">
@@ -15,6 +17,8 @@
     </div>
 
     <script>
+        let typingTimeout;
+        let isTyping = false;
         const chatId = "{{ chat_id }}";
         const currentUser = "{{ current_user }}";
         const readMessages = new Set();
@@ -63,7 +67,14 @@
             } else if (data.event === "message") {
                 renderMessage(data);
             } else if (data.event === "typing") {
-                console.log("Печатает...");
+                const indicator = document.getElementById("typing-indicator");
+                if (data.sender_id !== currentUser) {
+                    indicator.textContent = `${data.sender_name} печатает...`;
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        indicator.textContent = "";
+                    }, 1500);
+                }
             } else if (data.event === "read") {
                 const msgElement = document.getElementById(`msg-${data.message_id}`);
                 if (msgElement) {
@@ -89,7 +100,6 @@
             document.querySelectorAll(".message.left").forEach(msgEl => {
                 const msgId = msgEl.id.replace("msg-", "");
                 const isRead = msgEl.dataset.read === "true";
-
                 if (!readMessages.has(msgId) && !isRead && isElementInViewport(msgEl)) {
                     readMessages.add(msgId);
                     ws.send(JSON.stringify({
@@ -101,9 +111,20 @@
             });
         });
 
-        ws.onclose = () => {
-            console.log("Соединение закрыто");
-        };
+        document.getElementById("messageInput").addEventListener("input", () => {
+            if (!isTyping) {
+                isTyping = true;
+                ws.send(JSON.stringify({
+                    event: "typing",
+                    sender_id: currentUser,
+                    chat_id: chatId
+                }));
+            }
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+            }, 1000);
+        });
 
         function sendMessage() {
             const input = document.getElementById("messageInput");
@@ -129,6 +150,10 @@
                 sendMessage();
             }
         });
+
+        ws.onclose = () => {
+            console.log("Соединение закрыто");
+        };
     </script>
 </body>
 </html>

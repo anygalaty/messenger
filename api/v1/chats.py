@@ -55,7 +55,9 @@ async def chat_websocket(websocket: WebSocket, chat_id: str, db=Depends(async_ge
                 data['created_at'] = new_message.created_at.strftime("%d.%m.%Y, %H:%M")
                 await manager.broadcast(chat_id, data)
             elif data.get("event") == "typing":
-                await manager.broadcast(chat_id, data)
+                user = await get_user_by_id(data["sender_id"], db)
+                data["sender_name"] = user.name
+                await manager.broadcast(chat_id, data, exclude=websocket)
             elif data.get("event") == "read":
                 message_id = data.get("message_id")
                 user_id = data.get("user_id")
