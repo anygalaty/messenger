@@ -15,7 +15,7 @@ async def login(
 ):
     login_request = LoginRequest(email=email, password=password)
     tokens = await login_service(login_request.email, login_request.password, db)
-    response = RedirectResponse(url='/chats', status_code=status.HTTP_303_SEE_OTHER)
+    response = RedirectResponse(url='/messenger', status_code=status.HTTP_303_SEE_OTHER)
     response_with_cookie = user_set_auth_cookie(tokens, response)
     return response_with_cookie
 

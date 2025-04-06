@@ -15,8 +15,7 @@ class User(Base):
     chats: Mapped[list] = relationship(
         "Chat",
         secondary='chat_participants',
-        back_populates="participants",
-        # lazy="joined"
+        back_populates="participants"
     )
 
     groups: Mapped[list] = relationship(

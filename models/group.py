@@ -1,16 +1,9 @@
 from core.base import Base
 import uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, Enum, DateTime, ForeignKey, Table, Column
+from sqlalchemy import String, Enum, DateTime, ForeignKey, Column
 from models.user import User
 from datetime import datetime
-
-group_participants = Table(
-    'group_participants',
-    Base.metadata,
-    Column('group_id', String, ForeignKey('groups.id'), primary_key=True),
-    Column('user_id', String, ForeignKey('users.id'), primary_key=True)
-)
 
 
 class Group(Base):
@@ -22,7 +15,15 @@ class Group(Base):
     group_type: Mapped[str] = mapped_column(Enum('public', 'private', name='group_type_enum'), default='public')
     participants: Mapped[list[User]] = relationship(
         'User',
-        secondary=group_participants,
+        secondary='group_participants',
         back_populates='groups',
-        order_by=User.name
+        order_by='User.name',
+        lazy='joined'
     )
+
+
+class GroupParticipant(Base):
+    __tablename__ = 'group_participants'
+    __table_args__ = {'extend_existing': True}
+    group_id = Column('group_id', String, ForeignKey('groups.id'), primary_key=True)
+    user_id = Column('user_id', String, ForeignKey('users.id'), primary_key=True)

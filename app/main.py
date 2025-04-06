@@ -4,7 +4,7 @@ from api.v1.users import router as users_router
 from api.v1.auth import router as auth_router
 from api.v1.messages import router as messages_router
 from api.v1.views import router as views_router
-
+from api.v1.groups import router as groups_router
 
 app = FastAPI(title="Messenger")
 
@@ -35,6 +35,12 @@ app.include_router(
 app.include_router(
     views_router,
     tags=["views"]
+)
+
+app.include_router(
+    groups_router,
+    prefix="/api/v1/groups",
+    tags=["groups"]
 )
 
 # TODO сделать механизм 'typing...'

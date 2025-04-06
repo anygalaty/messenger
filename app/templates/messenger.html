@@ -20,7 +20,19 @@
       <p>Нет активных чатов</p>
     {% endif %}
     <h1>Ваши группы</h1>
-    <p>Тут будут группы</p>
+    {% if groups %}
+      <ul>
+        {% for group in groups %}
+          <li>
+            <a href="/group/{{ group.id }}">
+              {{ group.name }} группа от {{ group.created_at }}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>Нет активных групп</p>
+    {% endif %}
     <form action="/api/v1/auth/logout/" method="post">
         <button type="submit">Выйти</button>
     </form>
