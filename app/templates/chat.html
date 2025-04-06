@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат {{ chat_id }}</title>
+    <link rel="stylesheet" href="/static/css/chat.css">
+</head>
+<body>
+    <h1 style="text-align: center;">Чат {{ chat_id }}</h1>
+    <div id="messages"></div>
+
+    <div id="input-container">
+        <input type="text" id="messageInput" placeholder="Ваше сообщение...">
+        <button id="sendBtn" onclick="sendMessage()">Отправить</button>
+    </div>
+
+
+    <script>
+        const chatId = "{{ chat_id }}";
+        const currentUser = "{{ current_user }}";
+
+        const ws = new WebSocket(`ws://${window.location.host}/api/v1/chats/chat/${chatId}`);
+
+        ws.onopen = () => {
+            console.log("Соединение установлено");
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            const container = document.getElementById("messages");
+
+            function renderMessage(msg) {
+                const alignment = msg.sender_id === currentUser ? 'right' : 'left';
+                const readColor = msg.is_read ? 'green' : 'gray';
+                const messageHTML = `
+                    <div class="message ${alignment}">
+                        <div class="sender">${msg.sender_name} (${msg.sender_email})</div>
+                        <div class="text">${msg.text}</div>
+                        <div class="meta">
+                            <span class="timestamp">${msg.created_at}</span>
+                            <span class="read-status" style="color: ${readColor};">✓</span>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += messageHTML;
+                container.scrollTop = container.scrollHeight;
+            }
+
+            if (data.event === "history") {
+                data.messages.reverse().forEach(renderMessage);
+            } else if (data.event === "message") {
+                renderMessage(data);
+            } else if (data.event === "typing") {
+                console.log("Печатает...");
+            }
+        };
+
+        ws.onclose = () => {
+            console.log("Соединение закрыто");
+        };
+
+        function sendMessage() {
+            const input = document.getElementById("messageInput");
+            const text = input.value.trim();
+            if (!text) {
+                alert("Сообщение не может быть пустым!");
+                input.value = "";
+                return;
+            }
+            const message = {
+                event: "message",
+                sender_id: currentUser,
+                chat_id: chatId,
+                text: text
+            };
+            ws.send(JSON.stringify(message));
+            input.value = "";
+        }
+
+        document.getElementById("messageInput").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

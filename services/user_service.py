@@ -39,3 +39,11 @@ async def get_users_by_ids(users_ids: list[str], db) -> list[User]:
     )
     result = await db.execute(stmt)
     return result.scalars().all()
+
+
+async def get_user_by_id(user_id: str, db) -> User:
+    stmt = select(User).where(
+        User.id == user_id
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()

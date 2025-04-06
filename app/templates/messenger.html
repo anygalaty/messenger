@@ -12,12 +12,12 @@
   {% if chats %}
     <ul>
       {% for chat in chats %}
-        <li>
-          <a href="/chat/{{ chat.id }}">
-            {{ chat.chat_type.value }} чат от {{ chat.created_at }}
-          </a>
-        </li>
-      {% endfor %}
+      <li>
+        <a href="/chat/{{ chat.id }}">
+          {{ chat.chat_type.value|capitalize }} чат с {{ chat_names[chat.id]|join(', ') }}
+        </a>
+      </li>
+    {% endfor %}
     </ul>
   {% else %}
     <p>Нет активных чатов</p>
@@ -31,7 +31,7 @@
       {% for group in groups %}
         <li>
           <a href="/group/{{ group.id }}">
-            {{ group.name }} группа от {{ group.created_at }}
+             Группа "{{ group.name }}
           </a>
         </li>
       {% endfor %}

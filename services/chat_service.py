@@ -70,3 +70,12 @@ async def create_chat(chat: ChatCreate, db: async_get_db) -> ChatOut:
     )
 
     return new_chat_out
+
+
+async def get_chat_by_id(chat_id: str, db: async_get_db) -> ChatOut:
+    stmt = select(Chat).where(
+        Chat.id == chat_id
+    )
+    result = await db.execute(stmt)
+    chat = result.scalar_one_or_none()
+    return chat

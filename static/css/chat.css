@@ -1,0 +1,101 @@
+body {
+  background-color: #f3e9dd;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  text-align: center;
+  padding: 20px;
+  color: #333;
+}
+
+#messages {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 10px;
+  height: 70vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message {
+  max-width: 60%;
+  padding: 10px 15px;
+  border-radius: 15px;
+  background-color: #e1ffc7;
+  position: relative;
+  word-wrap: break-word;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.message.left {
+  align-self: flex-start;
+  background-color: #fff;
+}
+
+.message.right {
+  align-self: flex-end;
+  background-color: #d1f7c4;
+}
+
+.sender {
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-bottom: 3px;
+}
+
+.text {
+  font-size: 1em;
+  margin: 5px 0;
+}
+
+.meta {
+  display: flex;
+  justify-content: flex-end;
+  font-size: 0.75em;
+  color: #666;
+  gap: 5px;
+}
+
+.read-status {
+  font-weight: bold;
+}
+
+#input-container {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  max-width: 800px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  padding: 10px;
+  background-color: #f3e9dd;
+  gap: 10px;
+}
+
+#messageInput {
+  flex: 1;
+  padding: 10px;
+  font-size: 1em;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#sendBtn {
+  padding: 10px 16px;
+  font-size: 1em;
+  background-color: #117964;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#sendBtn:hover {
+  background-color: #0e5e4d;
+}
