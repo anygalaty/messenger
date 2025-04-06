@@ -14,10 +14,10 @@
         <button id="sendBtn" onclick="sendMessage()">Отправить</button>
     </div>
 
-
     <script>
         const chatId = "{{ chat_id }}";
         const currentUser = "{{ current_user }}";
+        const readMessages = new Set();
 
         const ws = new WebSocket(`ws://${window.location.host}/api/v1/chats/chat/${chatId}`);
 
@@ -31,15 +31,17 @@
 
             function renderMessage(msg) {
                 const alignment = msg.sender_id === currentUser ? 'right' : 'left';
-                const readColor = msg.is_read ? 'green' : 'gray';
+                const isRead = msg.is_read;
+                const readStatusIcon = isRead ? '✓✓' : '✓';
+                const readColor = isRead ? 'green' : 'gray';
 
                 const messageHTML = `
-                    <div class="message ${alignment}" id="msg-${msg.id}">
+                    <div class="message ${alignment}" id="msg-${msg.id}" data-read="${isRead}">
                         <div class="sender">${msg.sender_name} (${msg.sender_email})</div>
                         <div class="text">${msg.text}</div>
                         <div class="meta">
                             <span class="timestamp">${msg.created_at}</span>
-                            <span class="read-status" style="color: ${readColor};">✓</span>
+                            <span class="read-status" style="color: ${readColor}; font-weight: bold;">${readStatusIcon}</span>
                         </div>
                     </div>
                 `;
@@ -52,6 +54,7 @@
                         message_id: msg.id,
                         user_id: currentUser
                     }));
+                    readMessages.add(msg.id);
                 }
             }
 
@@ -64,15 +67,15 @@
             } else if (data.event === "read") {
                 const msgElement = document.getElementById(`msg-${data.message_id}`);
                 if (msgElement) {
+                    msgElement.dataset.read = "true";
                     const status = msgElement.querySelector('.read-status');
                     if (status) {
                         status.style.color = "green";
+                        status.textContent = "✓✓";
                     }
                 }
             }
         };
-
-        const readMessages = new Set();
 
         function isElementInViewport(el) {
             const rect = el.getBoundingClientRect();
@@ -85,7 +88,9 @@
         document.getElementById("messages").addEventListener("scroll", () => {
             document.querySelectorAll(".message.left").forEach(msgEl => {
                 const msgId = msgEl.id.replace("msg-", "");
-                if (!readMessages.has(msgId) && isElementInViewport(msgEl)) {
+                const isRead = msgEl.dataset.read === "true";
+
+                if (!readMessages.has(msgId) && !isRead && isElementInViewport(msgEl)) {
                     readMessages.add(msgId);
                     ws.send(JSON.stringify({
                         event: "read",
@@ -119,9 +124,9 @@
         }
 
         document.getElementById("messageInput").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
-            e.preventDefault();
-            sendMessage();
+            if (e.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
             }
         });
     </script>
