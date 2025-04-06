@@ -1,40 +1,144 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Мои чаты</title>
+  <meta charset="UTF-8">
+  <title>Мои чаты и группы</title>
+  <link rel="stylesheet" href="/static/css/messenger.css">
 </head>
 <body>
+  <header>
     <h1>Ваши чаты</h1>
-    {% if chats %}
-      <ul>
-        {% for chat in chats %}
-          <li>
-            <a href="/chat/{{ chat.id }}">
-              {{ chat.chat_type }} чат от {{ chat.created_at }}
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>Нет активных чатов</p>
-    {% endif %}
+  </header>
+  {% if chats %}
+    <ul>
+      {% for chat in chats %}
+        <li>
+          <a href="/chat/{{ chat.id }}">
+            {{ chat.chat_type.value }} чат от {{ chat.created_at }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет активных чатов</p>
+  {% endif %}
+
+  <header>
     <h1>Ваши группы</h1>
-    {% if groups %}
-      <ul>
-        {% for group in groups %}
-          <li>
-            <a href="/group/{{ group.id }}">
-              {{ group.name }} группа от {{ group.created_at }}
-            </a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>Нет активных групп</p>
-    {% endif %}
-    <form action="/api/v1/auth/logout/" method="post">
-        <button type="submit">Выйти</button>
-    </form>
+  </header>
+  {% if groups %}
+    <ul>
+      {% for group in groups %}
+        <li>
+          <a href="/group/{{ group.id }}">
+            {{ group.name }} группа от {{ group.created_at }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет активных групп</p>
+  {% endif %}
+
+  <form action="/api/v1/auth/logout/" method="post">
+    <button type="submit">Выйти</button>
+  </form>
+
+  <button class="plus-button" id="plusBtn">+</button>
+  <div id="choiceModal" class="modal">
+    <div class="modal-content">
+      <h2>Создать</h2>
+      <button onclick="openChatModal()">Чат</button>
+      <button onclick="openGroupModal()">Группа</button>
+      <br>
+      <button onclick="closeChoiceModal()">Отмена</button>
+    </div>
+  </div>
+
+  <div id="chatModal" class="modal">
+    <div class="modal-content">
+      <h2>Создать чат</h2>
+      <form action="/api/v1/chats/create" method="post">
+        <label for="chatType">Тип чата:</label>
+        <select id="chatType" name="chat_type">
+          <option value="personal">Личный чат</option>
+          <option value="group">Групповой чат</option>
+        </select>
+        <br>
+        <label for="participantsChat">Участники (ID через запятую):</label>
+        <input type="text" id="participantsChat" name="participants" placeholder="id1,id2,..." required>
+        <br>
+        <button type="submit">Создать чат</button>
+        <button type="button" onclick="closeChatModal()">Отмена</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="groupModal" class="modal">
+    <div class="modal-content">
+      <h2>Создать группу</h2>
+      <form action="/api/v1/groups/create" method="post">
+        <label for="groupName">Название:</label>
+        <input type="text" id="groupName" name="name" required>
+        <br>
+        <label for="groupType">Тип группы:</label>
+        <select id="groupType" name="group_type">
+          <option value="public">Публичная</option>
+          <option value="private">Приватная</option>
+        </select>
+        <br>
+        <label for="participantsGroup">Участники (ID через запятую):</label>
+        <input type="text" id="participantsGroup" name="participants" placeholder="id1,id2,...">
+        <br>
+        <button type="submit">Создать группу</button>
+        <button type="button" onclick="closeGroupModal()">Отмена</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const plusBtn = document.getElementById("plusBtn");
+    const choiceModal = document.getElementById("choiceModal");
+    const chatModal = document.getElementById("chatModal");
+    const groupModal = document.getElementById("groupModal");
+
+    plusBtn.addEventListener("click", () => {
+      choiceModal.style.display = "block";
+    });
+
+    function closeChoiceModal() {
+      choiceModal.style.display = "none";
+    }
+
+    function openChatModal() {
+      closeChoiceModal();
+      chatModal.style.display = "block";
+    }
+
+    function closeChatModal() {
+      chatModal.style.display = "none";
+    }
+
+    function openGroupModal() {
+      closeChoiceModal();
+      groupModal.style.display = "block";
+    }
+
+    function closeGroupModal() {
+      groupModal.style.display = "none";
+    }
+
+    window.onclick = function(event) {
+      if (event.target == choiceModal) {
+        closeChoiceModal();
+      }
+      if (event.target == chatModal) {
+        closeChatModal();
+      }
+      if (event.target == groupModal) {
+        closeGroupModal();
+      }
+    }
+  </script>
 </body>
 </html>

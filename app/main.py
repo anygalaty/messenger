@@ -5,8 +5,11 @@ from api.v1.auth import router as auth_router
 from api.v1.messages import router as messages_router
 from api.v1.views import router as views_router
 from api.v1.groups import router as groups_router
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI(title="Messenger")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(
     chats_router,
