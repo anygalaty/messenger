@@ -34,3 +34,4 @@ async def get_user_chats(
     current_user = await get_user_from_cookie(request)
     user_chats = await get_user_chats_service(current_user, db)
     return templates.TemplateResponse("chats.html", {"request": request, "chats": user_chats})
+    # TODO использовать тут вебсокет

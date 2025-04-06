@@ -31,3 +31,11 @@ async def register_user(user: UserCreate, db) -> UserOut | HTTPException:
 
     new_user = await create_user(user, db)
     return new_user
+
+
+async def get_users_by_ids(users_ids: list[str], db) -> list[User]:
+    stmt = select(User).where(
+        User.id.in_(users_ids)
+    )
+    result = await db.execute(stmt)
+    return result.scalars().all()
