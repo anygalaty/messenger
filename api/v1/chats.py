@@ -7,7 +7,8 @@ from schemas.message import MessageCreate
 from services.auth_service import get_user_from_cookie
 from services.chat_service import create_chat as create_chat_service
 from core.security import require_auth
-from services.message_service import create_message as create_message_service, get_messages_history_payload
+from services.message_service import create_message as create_message_service, get_messages_history_payload, \
+    mark_as_read
 from services.user_service import get_user_by_id
 
 router = APIRouter()
@@ -55,5 +56,11 @@ async def chat_websocket(websocket: WebSocket, chat_id: str, db=Depends(async_ge
                 await manager.broadcast(chat_id, data)
             elif data.get("event") == "typing":
                 await manager.broadcast(chat_id, data)
+            elif data.get("event") == "read":
+                message_id = data.get("message_id")
+                user_id = data.get("user_id")
+                payload = await mark_as_read(message_id, db)
+                payload["user_id"] = user_id
+                await manager.broadcast(chat_id, payload)
     except WebSocketDisconnect:
         await manager.disconnect(chat_id, websocket)

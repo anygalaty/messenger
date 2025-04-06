@@ -4,7 +4,7 @@ from models.message import Message
 from fastapi import HTTPException, status
 from core.constants import MAX_MESSAGE_LENGTH
 from services.chat_service import check_user
-from sqlalchemy import select
+from sqlalchemy import select, update
 from services.user_service import get_users_by_ids
 
 
@@ -69,3 +69,17 @@ async def get_messages_history_payload(
     }
 
     return history_payload
+
+
+async def mark_as_read(message_id: str, db: async_get_db):
+    stmt = update(Message).where(
+        Message.id == message_id
+    ).values(is_read=True)
+
+    await db.execute(stmt)
+    await db.commit()
+
+    return {
+        "event": "read",
+        "message_id": message_id
+    }
