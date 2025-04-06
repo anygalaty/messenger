@@ -9,42 +9,50 @@
   <header>
     <h1>Ваши чаты</h1>
   </header>
-  {% if chats %}
-    <ul>
-      {% for chat in chats %}
-      <li>
-        <a href="/chat/{{ chat.id }}">
-          {{ chat.chat_type.value|capitalize }} чат с {{ chat_names[chat.id]|join(', ') }}
-        </a>
-      </li>
-    {% endfor %}
-    </ul>
-  {% else %}
-    <p>Нет активных чатов</p>
-  {% endif %}
+
+  <div id="chatListContainer">
+    {% if chats %}
+      <ul>
+        {% for chat in chats %}
+          <li id="chat-{{ chat.id }}" class="chat-item">
+            <a href="/chat/{{ chat.id }}">
+              {{ chat.chat_type.value|capitalize }} чат с {{ chat_names[chat.id]|join(', ') }}
+            </a>
+            <span class="unread-indicator" style="display: none;">•</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty-message">Нет активных чатов</p>
+    {% endif %}
+  </div>
 
   <header>
     <h1>Ваши группы</h1>
   </header>
+
   {% if groups %}
     <ul>
       {% for group in groups %}
         <li>
           <a href="/group/{{ group.id }}">
-             Группа "{{ group.name }}
+            Группа "{{ group.name }}"
           </a>
         </li>
       {% endfor %}
     </ul>
   {% else %}
-    <p>Нет активных групп</p>
+    <p class="empty-message">Нет активных групп</p>
   {% endif %}
 
   <form action="/api/v1/auth/logout/" method="post">
     <button type="submit">Выйти</button>
   </form>
 
+  <div id="popup" class="popup" style="display:none;"></div>
+
   <button class="plus-button" id="plusBtn">+</button>
+
   <div id="choiceModal" class="modal">
     <div class="modal-content">
       <h2>Создать</h2>
@@ -129,16 +137,64 @@
     }
 
     window.onclick = function(event) {
-      if (event.target == choiceModal) {
-        closeChoiceModal();
+      if (event.target === choiceModal) closeChoiceModal();
+      if (event.target === chatModal) closeChatModal();
+      if (event.target === groupModal) closeGroupModal();
+    };
+
+    const ws = new WebSocket(`ws://${window.location.host}/api/v1/messenger/read/status`);
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({ event: "check_unread" }));
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.event === "unread_chats") {
+        data.chat_ids.forEach(id => {
+          const indicator = document.querySelector(`#chat-${id} .unread-indicator`);
+          if (indicator) indicator.style.display = "inline";
+        });
       }
-      if (event.target == chatModal) {
-        closeChatModal();
+
+      else if (data.event === "fully_read") {
+        const popup = document.getElementById("popup");
+        popup.innerHTML = `
+          <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+          Ваше сообщение в чате "${data.chat_name}" было прочитано всеми участниками!
+        `;
+        popup.style.display = "block";
       }
-      if (event.target == groupModal) {
-        closeGroupModal();
+
+      else if (data.event === "new_chat") {
+        const listContainer = document.querySelector("#chatListContainer");
+        const ul = listContainer.querySelector("ul") || document.createElement("ul");
+        const existing = document.getElementById(`chat-${data.chat_id}`);
+
+        if (!existing) {
+          const li = document.createElement("li");
+          li.id = `chat-${data.chat_id}`;
+          li.className = "chat-item";
+
+          const a = document.createElement("a");
+          a.href = `/chat/${data.chat_id}`;
+          a.textContent = data.chat_name;
+
+          const dot = document.createElement("span");
+          dot.className = "unread-indicator";
+          dot.style.display = "inline";
+          dot.textContent = "•";
+
+          li.appendChild(a);
+          li.appendChild(dot);
+
+          if (!ul.parentElement) listContainer.innerHTML = "";
+          ul.appendChild(li);
+          listContainer.appendChild(ul);
+        }
       }
-    }
+    };
   </script>
 </body>
 </html>

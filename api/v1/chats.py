@@ -3,13 +3,17 @@ from fastapi import Depends, APIRouter, Form, status, Request, WebSocket, WebSoc
 from core.websocket_manager import ConnectionManager
 from fastapi.responses import RedirectResponse
 from schemas.chat import ChatCreate, ChatOut
-from schemas.message import MessageCreate
 from services.auth_service import get_user_from_cookie
-from services.chat_service import create_chat as create_chat_service
+from services.chat_service import create_chat as create_chat_service, get_chat_display_name
 from core.security import require_auth
-from services.message_service import create_message as create_message_service, get_messages_history_payload, \
-    mark_as_read
+from services.message_service import (
+    get_messages_history_payload,
+    build_and_broadcast_message,
+    notify_unread_chats,
+    handle_message_read
+)
 from services.user_service import get_user_by_id
+from api.v1.messenger import manager as status_manager
 
 router = APIRouter()
 manager = ConnectionManager()
@@ -30,7 +34,25 @@ async def create_chat(
         participants=participants_list,
     )
     chat.participants.append(creator_id)
-    await create_chat_service(chat, db)
+    created_chat = await create_chat_service(chat, db)
+
+    from services.user_service import get_users_by_ids
+    users = await get_users_by_ids(participants_list + [creator_id], db)
+    name_map = {user.id: user.name for user in users}
+    for user_id in participants_list:
+        if user_id != creator_id:
+            display_name = get_chat_display_name(
+                chat_type=created_chat.chat_type.value,
+                participants=created_chat.participants,
+                name_map=name_map,
+                for_user_id=user_id
+            )
+            await status_manager.send_to_user(user_id, {
+                "event": "new_chat",
+                "chat_id": created_chat.id,
+                "chat_name": display_name
+            })
+
     return RedirectResponse(url="/messenger", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -43,26 +65,22 @@ async def chat_websocket(websocket: WebSocket, chat_id: str, db=Depends(async_ge
         while True:
             data = await websocket.receive_json()
             if data.get("event") == "message":
-                new_message = MessageCreate(
-                    chat_id=chat_id,
-                    sender_id=data["sender_id"],
-                    text=data["text"]
-                )
-                new_message = await create_message_service(new_message, db)
-                user = await get_user_by_id(data["sender_id"], db)
-                data['sender_name'] = user.name
-                data['sender_email'] = user.email
-                data['created_at'] = new_message.created_at.strftime("%d.%m.%Y, %H:%M")
-                await manager.broadcast(chat_id, data)
+                await build_and_broadcast_message(data, chat_id, db, manager, get_user_by_id)
+                await notify_unread_chats(chat_id, data["sender_id"], db, status_manager)
+
             elif data.get("event") == "typing":
                 user = await get_user_by_id(data["sender_id"], db)
                 data["sender_name"] = user.name
                 await manager.broadcast(chat_id, data, exclude=websocket)
+
             elif data.get("event") == "read":
-                message_id = data.get("message_id")
-                user_id = data.get("user_id")
-                payload = await mark_as_read(message_id, db)
-                payload["user_id"] = user_id
-                await manager.broadcast(chat_id, payload)
+                await handle_message_read(
+                    user_id=data["user_id"],
+                    message_id=data["message_id"],
+                    chat_id=chat_id,
+                    db=db,
+                    chat_ws_manager=manager,
+                    status_ws_manager=status_manager
+                )
     except WebSocketDisconnect:
         await manager.disconnect(chat_id, websocket)

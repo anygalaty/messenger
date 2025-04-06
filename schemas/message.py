@@ -17,3 +17,8 @@ class MessageOut(BaseModel):
     is_read: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class MessageReadSchema(BaseModel):
+    message_id: str
+    user_id: str

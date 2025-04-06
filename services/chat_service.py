@@ -77,5 +77,19 @@ async def get_chat_by_id(chat_id: str, db: async_get_db) -> ChatOut:
         Chat.id == chat_id
     )
     result = await db.execute(stmt)
-    chat = result.scalar_one_or_none()
+    chat = result.unique().scalar_one_or_none()
     return chat
+
+
+async def get_chat_participants(chat_id: str, db: async_get_db) -> list:
+    stmt = select(ChatParticipant).where(
+        ChatParticipant.chat_id == chat_id
+    )
+    result = await db.execute(stmt)
+    chat_participants = result.scalars().all()
+    return [cp.user_id for cp in chat_participants]
+
+
+def get_chat_display_name(chat_type: str, participants: list[str], name_map: dict[str, str], for_user_id: str) -> str:
+    others = [name_map[uid] for uid in participants if uid != for_user_id]
+    return f"{chat_type.capitalize()} чат с {', '.join(others)}"

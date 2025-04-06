@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from core.base import Base
 from sqlalchemy.orm import mapped_column, Mapped
-from sqlalchemy import String, DateTime, Boolean, ForeignKey
+from sqlalchemy import String, DateTime, Boolean, ForeignKey, Column
 from models.chat import Chat
 from models.user import User
 from core.constants import MAX_MESSAGE_LENGTH
@@ -16,3 +16,11 @@ class Message(Base):
     text: Mapped[str] = mapped_column(String(MAX_MESSAGE_LENGTH), nullable=False)
     created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
     is_read: Mapped[Boolean] = mapped_column(Boolean, default=False)
+
+
+class MessageRead(Base):
+    __tablename__ = 'message_reads'
+    __table_args__ = {'extend_existing': True}
+
+    message_id = Column('message_id', ForeignKey('messages.id'), primary_key=True)
+    user_id = Column('user_id', ForeignKey('users.id'), primary_key=True)

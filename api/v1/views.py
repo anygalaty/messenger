@@ -8,6 +8,7 @@ from services.auth_service import get_user_from_cookie
 from core.security import require_auth
 from services.user_service import get_users_by_ids
 
+
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
@@ -50,7 +51,6 @@ async def get_user_chats_groups(
         "chat_names": chat_names,
         "current_user_id": current_user
     })
-    # TODO использовать тут вебсокет
 
 
 @router.get("/chat/{chat_id}", response_class=HTMLResponse)
