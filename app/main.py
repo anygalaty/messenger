@@ -10,12 +10,16 @@ from api.v1.groups import router as groups_router
 from api.v1.messenger import router as messenger_router
 from api.v1.test import router as test_router
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware import Middleware
 from core.exceptions import (
     http_exception_handler, validation_exception_handler,
     unhandled_exception_handler
 )
+from core.middleware.logging_middleware import LoggingMiddleware
 
-app = FastAPI(title="Messenger")
+middleware = [Middleware(LoggingMiddleware)]
+
+app = FastAPI(title="Messenger", middleware=middleware)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
