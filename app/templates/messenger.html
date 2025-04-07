@@ -46,10 +46,14 @@
     <p class="empty-message">Нет активных групп</p>
   {% endif %}
 </div>
-
-  <form action="/api/v1/auth/logout/" method="post">
-    <button type="submit">Выйти</button>
-  </form>
+  <div style="text-align: center; margin-top: 20px;">
+    <div style="margin-bottom: 8px;">
+      <strong>Вы вошли как:</strong> {{ user_name }} ({{ user_email }})
+    </div>
+    <form action="/api/v1/auth/logout/" method="post" style="display: inline;">
+      <button type="submit">Выйти</button>
+    </form>
+  </div>
 
   <div id="popup" class="popup" style="display:none;"></div>
 

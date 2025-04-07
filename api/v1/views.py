@@ -11,7 +11,7 @@ from services.group_service import (
 from core.db.db import async_get_db
 from services.auth_service import get_user_from_cookie
 from core.security import require_auth
-from services.user_service import get_users_by_ids
+from services.user_service import get_users_by_ids, get_user_by_id
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -82,14 +82,16 @@ async def get_user_chats_groups(
         users = await get_users_by_ids(chat.participants, db)
         visible_names = [u.name for u in users if u.id != current_user]
         chat_names[chat.id] = visible_names
-
+    current_user_obj = await get_user_by_id(current_user, db)
     return templates.TemplateResponse(
         "messenger.html", {
             "request": request,
             "chats": user_chats,
             "groups": user_groups,
             "chat_names": chat_names,
-            "current_user_id": current_user
+            "current_user_id": current_user,
+            "user_name": current_user_obj.name,
+            "user_email": current_user_obj.email
         }
     )
 
