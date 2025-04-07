@@ -41,7 +41,10 @@ async def get_user_chats(user_id: str, db: async_get_db) -> list[ChatOut]:
 
 async def create_chat(chat: ChatCreate, db: async_get_db) -> ChatOut:
     if len(chat.participants) < 2:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Not enough participants")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Not enough participants"
+        )
     users = await get_users_by_ids(chat.participants, db)
     if len(users) != len(chat.participants):
         raise HTTPException(
@@ -90,6 +93,11 @@ async def get_chat_participants(chat_id: str, db: async_get_db) -> list:
     return [cp.user_id for cp in chat_participants]
 
 
-def get_chat_display_name(chat_type: str, participants: list[str], name_map: dict[str, str], for_user_id: str) -> str:
+def get_chat_display_name(
+    chat_type: str,
+    participants: list[str],
+    name_map: dict[str, str],
+    for_user_id: str
+) -> str:
     others = [name_map[uid] for uid in participants if uid != for_user_id]
     return f"{chat_type.capitalize()} чат с {', '.join(others)}"

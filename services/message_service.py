@@ -25,11 +25,11 @@ async def create_message(message: MessageCreate, db: async_get_db) -> MessageOut
 
 
 async def get_messages_history(
-        chat_id: str,
-        user_id: str,
-        limit: int,
-        offset: int,
-        db: async_get_db
+    chat_id: str,
+    user_id: str,
+    limit: int,
+    offset: int,
+    db: async_get_db
 ) -> list[MessageOut]:
     await check_user(user_id, chat_id, db)
     stmt = select(Message).where(
@@ -41,9 +41,9 @@ async def get_messages_history(
 
 
 async def get_messages_history_payload(
-        chat_id: str,
-        limit: int,
-        db: async_get_db
+    chat_id: str,
+    limit: int,
+    db: async_get_db
 ) -> dict:
     stmt = select(Message).where(
         Message.chat_id == chat_id
@@ -52,7 +52,10 @@ async def get_messages_history_payload(
     messages = result.scalars().all()
     user_ids = list({m.sender_id for m in messages})
     users = await get_users_by_ids(user_ids, db)
-    user_map = {u.id: {"name": u.name, "email": u.email} for u in users}
+    user_map = {u.id: {
+        "name": u.name,
+        "email": u.email
+    } for u in users}
     history_payload = {
         "event": "history",
         "messages": [
@@ -143,11 +146,12 @@ async def get_fully_read_messages(message_id: str, participants: list[str], db) 
 
 
 async def build_and_broadcast_message(
-        data: dict,
-        chat_id: str,
-        db,
-        chat_ws_manager,
-        get_user_by_id_func):
+    data: dict,
+    chat_id: str,
+    db,
+    chat_ws_manager,
+    get_user_by_id_func
+):
     new_message = MessageCreate(
         chat_id=chat_id,
         sender_id=data["sender_id"],
@@ -169,13 +173,22 @@ async def notify_unread_chats(chat_id: str, sender_id: str, db, status_ws_manage
     participants = await get_chat_participants(chat_id, db)
     for user_id in participants:
         if user_id != sender_id:
-            await status_ws_manager.send_to_user(user_id, {
-                "event": "unread_chats",
-                "chat_ids": [chat_id]
-            })
+            await status_ws_manager.send_to_user(
+                user_id, {
+                    "event": "unread_chats",
+                    "chat_ids": [chat_id]
+                }
+            )
 
 
-async def handle_message_read(user_id: str, message_id: str, chat_id: str, db, chat_ws_manager, status_ws_manager):
+async def handle_message_read(
+    user_id: str,
+    message_id: str,
+    chat_id: str,
+    db,
+    chat_ws_manager,
+    status_ws_manager
+):
     payload = await mark_as_read(user_id, message_id, db)
     payload["user_id"] = user_id
     await chat_ws_manager.broadcast(chat_id, payload)
@@ -190,10 +203,12 @@ async def handle_message_read(user_id: str, message_id: str, chat_id: str, db, c
 
         for participant_id in participants:
             if participant_id != user_id:
-                await status_ws_manager.send_to_user(participant_id, {
-                    "event": "fully_read",
-                    "message_id": message_id,
-                    "chat_id": chat_id,
-                    "chat_name": f"{chat.chat_type.capitalize()} чат с "
-                                 f"{', '.join(name for uid, name in name_map.items() if uid != participant_id)}"
-                })
+                await status_ws_manager.send_to_user(
+                    participant_id, {
+                        "event": "fully_read",
+                        "message_id": message_id,
+                        "chat_id": chat_id,
+                        "chat_name": f"{chat.chat_type.capitalize()} чат с "
+                                     f"{', '.join(name for uid, name in name_map.items() if uid != participant_id)}"
+                    }
+                )

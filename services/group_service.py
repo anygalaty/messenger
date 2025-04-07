@@ -1,13 +1,12 @@
-from datetime import datetime
-
 from sqlalchemy import select, insert, delete
 
 from core.db.db import async_get_db
-from models import User, Message
+from models import User
 from models.message import MessageGroup
 from schemas.group import GroupOut, GroupCreate
 from fastapi import status, HTTPException
 from models.group import Group, GroupParticipant
+from schemas.message import MessageGroupOut
 from services.user_service import get_users_by_ids
 
 
@@ -84,10 +83,12 @@ async def add_user_to_group(group_id: str, user_id: str, db):
 
 
 async def remove_user_from_group(group_id: str, user_id: str, db):
-    await db.execute(delete(GroupParticipant).where(
-        GroupParticipant.group_id == group_id,
-        GroupParticipant.user_id == user_id
-    ))
+    await db.execute(
+        delete(GroupParticipant).where(
+            GroupParticipant.group_id == group_id,
+            GroupParticipant.user_id == user_id
+        )
+    )
     await db.commit()
 
 
@@ -106,7 +107,7 @@ async def post_group_message(group_id: str, sender_id: str, text: str, db):
     db.add(message)
     await db.commit()
     await db.refresh(message)
-    return message
+    return MessageGroupOut.from_orm(message)
 
 
 async def get_group_messages_payload(group_id: str, limit: int, db) -> dict:
