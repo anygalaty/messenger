@@ -12,7 +12,10 @@ class Group(Base):
     name: Mapped[str] = mapped_column(String(50), default="Group")
     created_at: Mapped[DateTime] = mapped_column(DateTime, default=datetime.utcnow)
     creator_id: Mapped[str] = mapped_column(String, ForeignKey(User.id), nullable=False)
-    group_type: Mapped[str] = mapped_column(Enum('public', 'private', name='group_type_enum'), default='public')
+    group_type: Mapped[str] = mapped_column(
+        Enum('public', 'private', name='group_type_enum'),
+        default='public'
+    )
     participants: Mapped[list[User]] = relationship(
         'User',
         secondary='group_participants',
@@ -24,6 +27,8 @@ class Group(Base):
 
 class GroupParticipant(Base):
     __tablename__ = 'group_participants'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {
+        'extend_existing': True
+    }
     group_id = Column('group_id', String, ForeignKey('groups.id'), primary_key=True)
     user_id = Column('user_id', String, ForeignKey('users.id'), primary_key=True)

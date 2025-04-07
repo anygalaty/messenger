@@ -31,7 +31,9 @@ class MessageGroup(Base):
 
 class MessageRead(Base):
     __tablename__ = 'message_reads'
-    __table_args__ = {'extend_existing': True}
+    __table_args__ = {
+        'extend_existing': True
+    }
 
     message_id = Column('message_id', ForeignKey('messages.id'), primary_key=True)
     user_id = Column('user_id', ForeignKey('users.id'), primary_key=True)
