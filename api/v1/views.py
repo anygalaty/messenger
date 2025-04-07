@@ -2,12 +2,12 @@ from fastapi.responses import HTMLResponse
 from fastapi import APIRouter, Request, Depends
 from fastapi.templating import Jinja2Templates
 from services.chat_service import get_user_chats as get_user_chats_service
-from services.group_service import get_user_groups as get_user_groups_service
+from services.group_service import get_user_groups as get_user_groups_service, \
+    get_group_by_id as get_group_by_id_service
 from core.db.db import async_get_db
 from services.auth_service import get_user_from_cookie
 from core.security import require_auth
 from services.user_service import get_users_by_ids
-
 
 router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
@@ -64,3 +64,18 @@ async def chat_page(
         "chat.html",
         {"request": request, "chat_id": chat_id, "current_user": current_user}
     )
+
+
+@router.get("/group/{group_id}", response_class=HTMLResponse)
+@require_auth
+async def group_page(group_id: str, request: Request, db=Depends(async_get_db)):
+    user_id = await get_user_from_cookie(request)
+    group = await get_group_by_id_service(group_id, db)
+    is_participant = user_id in [p.id for p in group.participants]
+    return templates.TemplateResponse("group.html", {
+        "request": request,
+        "group": group,
+        "is_participant": is_participant,
+        "is_owner": group.creator_id == user_id,
+        "user_id": user_id
+    })

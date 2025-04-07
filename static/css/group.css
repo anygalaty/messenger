@@ -1,6 +1,6 @@
 body {
-  background-color: #f3e9dd;
   font-family: 'Segoe UI', sans-serif;
+  background-color: #f3e9dd;
   margin: 0;
   padding: 0;
 }
@@ -37,11 +37,6 @@ h1 {
   background-color: #fff;
 }
 
-.message.right {
-  align-self: flex-end;
-  background-color: #d1f7c4;
-}
-
 .sender {
   font-weight: bold;
   font-size: 0.9em;
@@ -54,17 +49,9 @@ h1 {
 }
 
 .meta {
-  display: flex;
-  justify-content: flex-end;
   font-size: 0.75em;
   color: #666;
-  gap: 5px;
-}
-
-.read-status {
-    color: gray;
-    font-weight: bold;
-    font-size: 1.2em;
+  text-align: right;
 }
 
 #input-container {
@@ -78,6 +65,8 @@ h1 {
   padding: 10px;
   background-color: #f3e9dd;
   gap: 10px;
+  align-items: center;
+  justify-content: center;
 }
 
 #messageInput {
@@ -88,7 +77,7 @@ h1 {
   border: 1px solid #ccc;
 }
 
-#sendBtn {
+.btn {
   padding: 10px 16px;
   font-size: 1em;
   background-color: #117964;
@@ -98,8 +87,16 @@ h1 {
   cursor: pointer;
 }
 
-#sendBtn:hover {
+.btn:hover {
   background-color: #0e5e4d;
+}
+
+.btn.leave {
+  background-color: #cc3d3d;
+}
+
+.btn.leave:hover {
+  background-color: #a32727;
 }
 
 .back-link {

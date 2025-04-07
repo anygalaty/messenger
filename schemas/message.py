@@ -22,3 +22,19 @@ class MessageOut(BaseModel):
 class MessageReadSchema(BaseModel):
     message_id: str
     user_id: str
+
+
+class MessageGroupCreate(BaseModel):
+    group_id: str
+    sender_id: str
+    text: str
+
+
+class MessageGroupOut(BaseModel):
+    id: str
+    group_id: str
+    sender_id: str
+    text: str
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)

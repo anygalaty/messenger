@@ -31,10 +31,11 @@
     <h1>Ваши группы</h1>
   </header>
 
+  <div id="groupListContainer">
   {% if groups %}
-    <ul>
+    <ul id="group-list">
       {% for group in groups %}
-        <li>
+        <li id="group-{{ group.id }}">
           <a href="/group/{{ group.id }}">
             Группа "{{ group.name }}"
           </a>
@@ -44,6 +45,7 @@
   {% else %}
     <p class="empty-message">Нет активных групп</p>
   {% endif %}
+</div>
 
   <form action="/api/v1/auth/logout/" method="post">
     <button type="submit">Выйти</button>
@@ -156,6 +158,29 @@
           const indicator = document.querySelector(`#chat-${id} .unread-indicator`);
           if (indicator) indicator.style.display = "inline";
         });
+      }
+      else if (data.event === "new_group") {
+        let groupList = document.querySelector("#group-list");
+
+        if (!groupList) {
+          const groupContainer = document.getElementById("groupListContainer");
+          groupList = document.createElement("ul");
+          groupList.id = "group-list";
+          groupContainer.innerHTML = "";
+          groupContainer.appendChild(groupList);
+        }
+
+        if (!document.getElementById(`group-${data.group_id}`)) {
+          const li = document.createElement("li");
+          li.id = `group-${data.group_id}`;
+
+          const a = document.createElement("a");
+          a.href = `/group/${data.group_id}`;
+          a.textContent = `Группа "${data.group_name}"`;
+
+          li.appendChild(a);
+          groupList.appendChild(li);
+        }
       }
 
       else if (data.event === "fully_read") {
