@@ -75,8 +75,8 @@
           <option value="group">Групповой чат</option>
         </select>
         <br>
-        <label for="participantsChat">Участники (ID через запятую):</label>
-        <input type="text" id="participantsChat" name="participants" placeholder="id1,id2,..." required>
+        <label for="participantsChat">Введите ID пользователя/ей:</label>
+        <input type="text" id="participantsChat" name="participants" placeholder="id1" required>
         <br>
         <button type="submit">Создать чат</button>
         <button type="button" onclick="closeChatModal()">Отмена</button>
@@ -111,6 +111,16 @@
     const choiceModal = document.getElementById("choiceModal");
     const chatModal = document.getElementById("chatModal");
     const groupModal = document.getElementById("groupModal");
+    const chatTypeSelect = document.getElementById("chatType");
+    const participantsChatInput = document.getElementById("participantsChat");
+
+    chatTypeSelect.addEventListener("change", () => {
+      if (chatTypeSelect.value === "personal") {
+        participantsChatInput.placeholder = "id1";
+      } else {
+        participantsChatInput.placeholder = "id1,id2,...";
+      }
+    });
 
     plusBtn.addEventListener("click", () => {
       choiceModal.style.display = "block";
