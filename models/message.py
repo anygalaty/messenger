@@ -35,5 +35,5 @@ class MessageRead(Base):
         'extend_existing': True
     }
 
-    message_id = Column('message_id', ForeignKey('messages.id'), primary_key=True)
-    user_id = Column('user_id', ForeignKey('users.id'), primary_key=True)
+    message_id: Mapped[str] = mapped_column(String, ForeignKey('messages.id'), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey('users.id'), primary_key=True)

@@ -30,5 +30,5 @@ class ChatParticipant(Base):
         'extend_existing': True
     }
 
-    chat_id = Column('chat_id', String, ForeignKey('chats.id'), primary_key=True)
-    user_id = Column('user_id', String, ForeignKey('users.id'), primary_key=True)
+    chat_id: Mapped[str] = mapped_column(String, ForeignKey('chats.id'), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey('users.id'), primary_key=True)

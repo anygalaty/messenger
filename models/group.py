@@ -30,5 +30,6 @@ class GroupParticipant(Base):
     __table_args__ = {
         'extend_existing': True
     }
-    group_id = Column('group_id', String, ForeignKey('groups.id'), primary_key=True)
-    user_id = Column('user_id', String, ForeignKey('users.id'), primary_key=True)
+
+    group_id: Mapped[str] = mapped_column(String, ForeignKey('groups.id'), primary_key=True)
+    user_id: Mapped[str] = mapped_column(String, ForeignKey('users.id'), primary_key=True)
