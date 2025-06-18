@@ -33,6 +33,26 @@ async def register_user(user: UserCreate, db) -> UserOut | HTTPException:
     return new_user
 
 
+async def get_users(participants: list[str], db) -> list[User]:
+    emails = []
+    ids = []
+    for participant in participants:
+        if '@' in participant:
+            emails.append(participant)
+        else:
+            ids.append(participant)
+    users_email = await get_users_by_email(emails, db)
+    users_id = await get_users_by_ids(ids, db)
+
+    return users_email + users_id
+
+
+async def get_users_by_email(email: list[str], db) -> list[User]:
+    stmt = select(User).where(User.email.in_(email))
+    result = await db.execute(stmt)
+    return result.scalars().all()
+
+
 async def get_users_by_ids(users_ids: list[str], db) -> list[User]:
     stmt = select(User).where(
         User.id.in_(users_ids)

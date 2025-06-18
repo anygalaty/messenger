@@ -12,7 +12,7 @@ from services.message_service import (
     notify_unread_chats,
     handle_message_read
 )
-from services.user_service import get_user_by_id, get_users_by_ids
+from services.user_service import get_user_by_id, get_users
 from api.v1.messenger import manager as status_manager
 from core.websocket_manager import ConnectionManager
 
@@ -31,7 +31,7 @@ manager = ConnectionManager()
 async def create_chat(
     request: Request,
     chat_type: str = Form(..., description="Тип чата: 'personal' или 'group'"),
-    participants: str = Form(..., description="Список ID участников через запятую"),
+    participants: str = Form(..., description="Список ID или email участников через запятую"),
     db: AsyncSession = Depends(async_get_db)
 ) -> RedirectResponse:
     creator_id = await get_user_from_cookie(request)
@@ -43,7 +43,7 @@ async def create_chat(
     chat.participants.append(creator_id)
     created_chat = await create_chat_service(chat, db)
 
-    users = await get_users_by_ids(participants_list + [creator_id], db)
+    users = await get_users(participants_list + [creator_id], db)
     name_map = {user.id: user.name for user in users}
     for user_id in participants_list:
         if user_id != creator_id:
